@@ -2,6 +2,7 @@
 namespace App\Models;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
 use Illuminate\Support\Facades\File;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class Post {
 
@@ -88,6 +89,16 @@ class Post {
         // return cache()->remember("posts.{$slug}", now()->addMinutes(20), function() use($path){
         //     return file_get_contents($path);
         // });
+    }
+
+    public static function findOrFail($slug){
+        $post = static::find($slug);
+
+        if(!$post){
+            throw new ModelNotFoundException();
+        }
+
+        return $post;
     }
 }
 
