@@ -1,0 +1,7 @@
+{
+    "require": {
+        "laravel/passport": "^10.4",
+        "cviebrock/eloquent-sluggable": "^8.0",
+        "spatie/yaml-front-matter": "^2.0"
+    }
+}
