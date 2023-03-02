@@ -20,7 +20,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     //$posts = Post::all(); //Con esto no se trae relaciones salvo que se usen (muchas peticiones, al final)
     $posts = Post::latest()->with('category', 'author')->get(); //Con esto se trae la clase y sus relaciones en una petición ordenada de más nuevo a más viejo. Se puede sustituir por $with en Post.php.
-    return view('posts', ['posts' => $posts]);
+    return view('posts', [
+        'posts' => $posts,
+        'categories' => Category::all()
+    ]);
 });
 
 Route::get('/posts/{post:slug}', function(Post $post) {  //Para que el binding funcione deben coincidir los nombres {post} y $post
@@ -29,9 +32,15 @@ Route::get('/posts/{post:slug}', function(Post $post) {  //Para que el binding f
 
 Route::get('/categoria/{category:slug}', function(Category $category) {
     //load es como with, pero se usa cuando se trabaja sobre un modelo existente. Si se pone $with en Post.php, se debe quitar load aquí.
-    return view('posts', ['posts' => $category->posts->load(['category', 'author'])]);    //posts es el método en el modelo de Category.php
+    return view('posts', [
+        'posts' => $category->posts->load(['category', 'author']),
+        'categories' => Category::all()
+    ]);    //posts es el método en el modelo de Category.php
 });
 
 Route::get('/autor/{author:username}', function (User $author){
-    return view('posts', ['posts' => $author->posts->load(['category', 'author'])]);
+    return view('posts', [
+        'posts' => $author->posts->load(['category', 'author']),
+        'categories' => Category::all()
+    ]);
 });
