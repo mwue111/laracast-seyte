@@ -18,9 +18,49 @@ class Post extends Model
     ];
 
     //protected $guarded = ['id'];
+    protected $guarded = [];
 
     //Para no tener que poner ni with ni load en el fichero de rutas/controlador cuando se refiera a posts:
-    //protected $with = ['category', 'author];
+    protected $with = ['category', 'author'];
+
+    //Crear un método de busqueda (queryScope): $query se le pasa por Laravel automáticamente, es el queryBuilder.
+    //el array de filtros es para que el modelo no tenga acceso a request('search'), porque no es su función.
+    //el controlador se encarga del request('search'), lo convierte en array como request(['search]) y lo envía aquí
+    public function scopeFilter($query, array $filters) {
+
+        //Primera aproximación: usando request('search') aquí:
+        // if($filters['search'] ?? false){
+            //     $query
+            //         ->where('title', 'like', '%' . request('search') . '%')
+            //         ->orWhere('body', 'like', '%' . request('search') . '%');
+        // }
+
+        //segunda aproximación:
+        $query->when($filters['search'] ?? false, function($query, $search) {
+            $query
+            ->where('title', 'like', '%' . $search . '%')
+            ->orWhere('body', 'like', '%' . $search . '%');
+        });
+
+        //Hacer lo mismo pero con el dropdown de categorías:
+        $query->when($filters['category'] ?? false, function($query, $category) {
+            //Primera aproximación:
+            // $query
+            //     ->whereExists(function($query){
+            //         $query->from('categories')  //tabla
+            //            ->whereColumn('categories.id', 'posts.category_id') //si se usa where en lugar de whereColumn, toma 'posts.category_id' como un string
+            //            ->where('categories.slug', $category);
+            //      });
+
+            //Segunda aproximación:
+            $query->whereHas('category', function($query) use($category){ //'category' es la función category() de aquí
+                //dd($category);
+                $query
+                    ->where('slug', $category);
+            });
+        });
+
+    }
 
     public function category(){
         return $this->belongsTo(Category::class);
