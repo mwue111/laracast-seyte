@@ -25,7 +25,7 @@ class Post extends Model
 
     //Crear un método de busqueda (queryScope): $query se le pasa por Laravel automáticamente, es el queryBuilder.
     //el array de filtros es para que el modelo no tenga acceso a request('search'), porque no es su función.
-    //el controlador se encarga del request('search'), lo convierte en array como request(['search]) y lo envía aquí
+    //el controlador se encarga del request('search'), lo convierte en array como request(['search']) y lo envía aquí
     public function scopeFilter($query, array $filters) {
 
         //Primera aproximación: usando request('search') aquí:
@@ -35,18 +35,26 @@ class Post extends Model
             //         ->orWhere('body', 'like', '%' . request('search') . '%');
         // }
 
-        //segunda aproximación:
+        //segunda aproximación: no funciona porque cuando hay más de un criterio de filtro (p.ej, palabra + categoría) devuelve todo lo que cumpla el criterio del search sí o sí + el otro criterio (devuelve más de una categoría cuando hay varios títulos con una palabra que se ha buscado)
+        // $query->when($filters['search'] ?? false, function($query, $search) {
+        //     $query
+        //     ->where('title', 'like', '%' . $search . '%')
+        //     ->orWhere('body', 'like', '%' . $search . '%');
+        // });
+
         $query->when($filters['search'] ?? false, function($query, $search) {
-            $query
-            ->where('title', 'like', '%' . $search . '%')
-            ->orWhere('body', 'like', '%' . $search . '%');
+            $query->where(function($query) use($search){
+                $query
+                    ->where('title', 'like', '%' . $search . '%')
+                    ->orWhere('body', 'like', '%' . $search . '%');
+            });
         });
 
         //Hacer lo mismo pero con el dropdown de categorías:
         $query->when($filters['category'] ?? false, function($query, $category) {
             //Primera aproximación:
             // $query
-            //     ->whereExists(function($query){
+            //     ->whereExists(function($query) use ($category){
             //         $query->from('categories')  //tabla
             //            ->whereColumn('categories.id', 'posts.category_id') //si se usa where en lugar de whereColumn, toma 'posts.category_id' como un string
             //            ->where('categories.slug', $category);
@@ -57,6 +65,13 @@ class Post extends Model
                 //dd($category);
                 $query
                     ->where('slug', $category);
+            });
+        });
+
+        $query->when($filters['author'] ?? false, function($query, $author) {
+            $query->whereHas('author', function($query) use ($author){
+                $query
+                    ->where('username', $author);
             });
         });
 

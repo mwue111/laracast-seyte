@@ -14,13 +14,20 @@
 
     <!--Links-->
     <!--href="/" y :active hacen lo mismo, pero :active hace uso de los nombres de las rutas-->
-    <x-dropdown-item href="/" :active="request()->routeIs('home')">Todas</x-dropdown-item>
+    <x-dropdown-item
+        href="/?{{http_build_query(request()->except('category', 'page'))}}"
+        :active="request()->routeIs('home')"
+    >
+        Todas
+    </x-dropdown-item>
 
         @foreach($categories as $category)
 
+            <!--request except para que devuelva una categoría salvo la actual porque si no muestra dos categorías en la misma url-->
+            <!--request except devuelve un array, y http_build_query coge arrays y los convierte en urls-->
             <x-dropdown-item
-                href="/?category={{$category->slug}}"
-                :active='request()->is("category/{{$category->slug}}")'
+                href="/?category={{$category->slug}}&{{http_build_query(request()->except('category', 'page'))}}"
+                :active='request()->is("categories/{{$category->slug}}")'
             >
             <!--
                 :active="isset($currentCategory) && $currentCategory->is($category)"
