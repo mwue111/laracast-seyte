@@ -3,6 +3,7 @@
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
+use App\Http\Controllers\PostCommentsController;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\User;
@@ -47,6 +48,8 @@ Route::get('/posts/{post:slug}', [PostController::class, 'show']);
 //         //'categories' => Category::all() //'categories' se pasa a través de CategoryDropdown.php (en app\view\components)
 //     ]);
 // });
+
+Route::post('posts/{post:slug}/comments', [PostCommentsController::class, 'store']);
 
 Route::get('register', [RegisterController::class, 'create'])->middleware('guest');
 Route::post('register', [RegisterController::class, 'store'])->middleware('guest');
