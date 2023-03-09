@@ -9,7 +9,7 @@ class PostCommentsController extends Controller
 {
     //Guardar un nuevo comentario en un post concreto
     public function store(Post $post) {
-        //dd(request()->all()); //Para ver lo que llega al método
+        //dd(request()->user()->id); //Para ver lo que llega al método
 
         //validar datos
         request()->validate([
@@ -17,7 +17,7 @@ class PostCommentsController extends Controller
         ]);
 
         //crear el comentario en la base de datos
-        $post->comments->create([   //El método comments del modelo
+        $post->comments()->create([   //El método comments del modelo
             //El id del post ya lo tengo por Post $post
             'user_id' => request()->user()->id, //aquí - 6:58 vídeo 56
             'body' => request('body')

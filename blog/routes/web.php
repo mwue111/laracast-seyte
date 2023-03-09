@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
@@ -9,6 +10,7 @@ use App\Models\Category;
 use App\Models\User;
 //use Spatie\YamlFrontMatter\YamlFrontMatter;
 use Illuminate\Support\Facades\Route;
+use App\Services\Newsletter;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,26 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+//Probando Mailchimp:
+Route::get('ping', function () {
+    $mailchimp = new \MailchimpMarketing\ApiClient();
+
+    $mailchimp->setConfig([
+        'apiKey' => config('services.mailchimp.key'),
+        'server' => 'us18'
+    ]);
+
+    $response = $mailchimp->lists->addListMember("ee6c38ab0d", [
+        "email_address" => "mwue111@g.educaand.es", //Esto vendría del input
+        "status" => "subscribed",
+    ]);
+
+    ddd($response);
+});
+
+//Ruta para la newsletter: es un controlador con una única función
+Route::post('newsletter', NewsletterController::class);
 
 Route::get('/', [PostController::class, 'index'])->name('home');
 
@@ -57,3 +79,6 @@ Route::post('register', [RegisterController::class, 'store'])->middleware('guest
 Route::get('login', [SessionsController::class, 'create'])->middleware('guest');
 Route::post('login', [SessionsController::class, 'store'])->middleware('guest');
 Route::post('logout', [SessionsController::class, 'destroy'])->middleware('auth');
+
+Route::post('admin/posts', [PostController::class, 'store'])->middleware('admin');
+Route::get('admin/posts/create', [PostController::class, 'create'])->middleware('admin');
