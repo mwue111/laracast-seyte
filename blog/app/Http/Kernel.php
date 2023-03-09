@@ -56,10 +56,10 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-        'admin' => MustBeAdministrator::class,
+        //'admin' => MustBeAdministrator::class,    //"Eliminado" al crear la autorización en AApp\Providers\AppServiceProvider.php
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'can' => \Illuminate\Auth\Middleware\Authorize::class,  //Este se usará en lugar de 'admin' en routes (viene por defecto)
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,

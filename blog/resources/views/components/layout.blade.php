@@ -25,18 +25,44 @@
             </div>
 
             <div class="mt-8 md:mt-0 flex items-center">
+
                 @guest
                     <a href="/register" class="text-xs font-bold uppercase mx-3">Regístrate</a>
                     <a href="/login" class="text-xs font-bold uppercase">Iniciar Sesión</a>
                 @else
-                    <span class="text-xs font-bold uppercase mx-2">¡Bienvenido/a de vuelta, {{ auth()->user()->name }}!</span>
+                    <x-dropdown>
+                        <x-slot name="trigger">
 
-                    <form  method="POST" action="/logout" class="text-xs font-semibold text-blue-500 ml-6">
-                        @csrf
+                            <button class="text-xs font-bold uppercase mx-2">¡Bienvenido/a de vuelta, {{ auth()->user()->name }}!</button>
 
-                        <button type="submit">Cerrar Sesión</button>
+                        </x-slot>
 
-                    </form>
+                        <!--Estos links sólo deben ser visibles para el administrador-->
+                        @admin
+                            <x-dropdown-item href="/admin/posts"
+                                            :active='request()->is("admin/posts")'
+                            >
+                                Dashboard
+                            </x-dropdown-item>
+
+                            <x-dropdown-item href="/admin/posts/create"
+                                            :active='request()->is("admin/posts/create")'
+                            >
+                                Nuevo post
+                            </x-dropdown-item>
+                        @endadmin
+                        <!--fin links-->
+
+                        <!--Para cerrar sesión: el link no redirige a ninguna página, se declara como componente de alpine.js, se hace un prevent default al hacer click (para que no redirija) y en su lugar se define la acción, que lleva al elemento del DOM con id logout-form y hace submit de ese formulario oculto.-->
+                        <x-dropdown-item href="#" x-data="{}" @click.prevent="document.querySelector('#logout-form').submit()">
+                            Cerrar sesión
+                        </x-dropdown-item>
+
+                        <form id="logout-form"  method="POST" action="/logout" class="hidden">
+                            @csrf
+                        </form>
+                    </x-dropdown>
+
                 @endguest
 
                 <a href="#newsletter" class="bg-blue-500 ml-3 rounded-full text-xs font-semibold text-white uppercase py-3 px-5">

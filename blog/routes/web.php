@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SessionsController;
 use App\Http\Controllers\PostCommentsController;
+use App\Http\Controllers\AdminPostController;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\User;
@@ -80,5 +81,26 @@ Route::get('login', [SessionsController::class, 'create'])->middleware('guest');
 Route::post('login', [SessionsController::class, 'store'])->middleware('guest');
 Route::post('logout', [SessionsController::class, 'destroy'])->middleware('auth');
 
-Route::post('admin/posts', [PostController::class, 'store'])->middleware('admin');
-Route::get('admin/posts/create', [PostController::class, 'create'])->middleware('admin');
+//Administración de posts:
+
+//1. Cambiar el middleware eliminado por can:admin (can:nombre especificado en App\Providers\AppServiceProvider.php)
+// Route::get('admin/posts/create', [AdminPostController::class, 'create'])->middleware('can:admin');
+// Route::post('admin/posts', [AdminPostController::class, 'store'])->middleware('can:admin');
+// Route::get('admin/posts', [AdminPostController::class, 'index'])->middleware('can:admin');
+// Route::post('admin/posts/{post}/edit', [AdminPostController::class, 'edit'])->middleware('can:admin');
+// Route::patch('admin/posts/{post}', [AdminPostController::class, 'update'])->middleware('can:admin');
+// Route::delete('admin/posts/{post}', [AdminPostController::class, 'destroy'])->middleware('can:admin');
+
+//2. Agrupar las rutas y hacer que a todas se aplique el middleware can:admin:
+Route::middleware('can:admin')->group(function () {
+
+    //3. Usar resource en lugar del verbo de cada ruta e indicar que NO tenemos el método show:
+    Route::resource('admin/posts', AdminPostController::class)->except('show');
+
+    // Route::get('admin/posts/create', [AdminPostController::class, 'create']);
+    // Route::post('admin/posts', [AdminPostController::class, 'store']);
+    // Route::get('admin/posts', [AdminPostController::class, 'index']);
+    // Route::post('admin/posts/{post}/edit', [AdminPostController::class, 'edit']);
+    // Route::patch('admin/posts/{post}', [AdminPostController::class, 'update']);
+    // Route::delete('admin/posts/{post}', [AdminPostController::class, 'destroy']);
+});

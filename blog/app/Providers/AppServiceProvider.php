@@ -7,6 +7,10 @@ use Illuminate\Support\ServiceProvider;
 use App\Services\MailChimpNewsletter;
 use App\Services\Newsletter;
 use MailchimpMarketing\ApiClient;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Blade;
+use App\Models\User;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,5 +43,19 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();   //es el valor por defecto así que no hace falta ponerlo
         //Model::unguard; //e importarlo arriba. Para no tener que añadir protected $guarded en cada modelo. Impide request()->all().
+
+        //Autorización: permite entrar a determinadas rutas a algunos usuarios y a otros no
+        Gate::define('admin', function (User $user) {
+            return $user->username === 'admin';
+        });
+
+        //Para crear una directiva tipo @admin en lugar de @can o @if en blade
+        Blade::if('admin', function () {
+            //php8: return request()->user()?->can('admin');
+
+            if(null !== (request()->user())){
+                return request()->user()->can('admin');
+            }
+        });
     }
 }
